@@ -1,5 +1,3 @@
-#Written by İlhan Koçaslan
-
 import numpy
 def sigmoid(x):
     return 1 / (1 + numpy.exp(-x))
@@ -48,7 +46,6 @@ class neuralNetwork():
         return reversed_dict
 
     def train(self, inputs_list, targets_list):
-
         inputs = numpy.array(inputs_list, ndmin=2).T
         targets = numpy.array(targets_list, ndmin=2).T
 
@@ -96,11 +93,11 @@ class neuralNetwork():
             if error_center == 0:
                 break
 
-        
+       
 
 
 
-        outlastcounter=4
+        outlastcounter=len(self.alllayer)-1
         stl_point=0
         for update_weight in self.reversedallweights.keys():
             if stl_point == 0:
@@ -119,11 +116,6 @@ class neuralNetwork():
 
 
         pass
-
-
-
-
-
     def query(self,inputs_list):
         inputs = numpy.array(inputs_list, ndmin=2).T
         starting_point=0
@@ -143,82 +135,8 @@ class neuralNetwork():
 
 
 
-        
-        return self.ramstart1
+        print(self.ramstart1, "ramstart1")  
+
 
         pass
-
-    def trainf(self, inputs_list, targets_list,nlr):
-        self.lr=nlr
-
-        inputs = numpy.array(inputs_list, ndmin=2).T
-        targets = numpy.array(targets_list, ndmin=2).T
-
-        self.allouts["o1"] = inputs
-        outcounter = 1
-        starting_point = 0 
-        for weigh in self.allweights.values():
-            if starting_point == 0:
-                starting_point += 1
-                self.ramstart = numpy.dot(weigh, inputs)
-                self.ramstart = self.activation_function(self.ramstart)
-                
-                self.allouts["o2"] = self.ramstart
-                outcounter += 1
-            else:
-                outcounter += 1
-                self.ramstart1 = numpy.dot(weigh, self.ramstart)
-                self.ramstart1 = self.activation_function(self.ramstart1)
-                self.ramstart = self.ramstart1
-                
-                self.allouts["o" + str(outcounter)] = self.ramstart1
-
-        
-
-        output_error = targets - self.ramstart1
-        
-
-        error_center = len(self.alllayer) - 2  
-        
-
-        self.reversedallweights = self.reverse_dictionary(self.allweights.copy())  
-
-        st_point = 0
-        for revweigh in self.reversedallweights.values():  
-            if st_point == 0:
-                self.remst = numpy.dot(revweigh.T, output_error)
-                self.allerrors[str(error_center)] = self.remst
-                st_point += 1
-                error_center -= 1
-            else:
-                self.remst1 = numpy.dot(revweigh.T, self.remst)
-                self.allerrors[str(error_center)] = self.remst1
-                self.remst = self.remst1
-                error_center -= 1
-            if error_center == 0:
-                break
-
-        
-
-        outlastcounter = 4
-        stl_point = 0
-        for update_weight in self.reversedallweights.keys():
-            if stl_point == 0:
-                val = self.reversedallweights[
-                    update_weight]  
-                val += self.lr * numpy.dot((output_error * self.ramstart1 * (1 - self.ramstart1)),
-                                           numpy.transpose(self.allouts["o" + str(outlastcounter)]))
-                self.reversedallweights[update_weight] = val
-                stl_point += 1
-                outlastcounter -= 1
-            else:
-                val1 = self.reversedallweights[update_weight]
-                val1 += self.lr * numpy.dot((self.allerrors[str(outlastcounter)] * self.allouts[
-                    "o" + str(outlastcounter + 1)] * (1 - self.allouts["o" + str(outlastcounter + 1)])),
-                                            numpy.transpose(self.allouts["o" + str(outlastcounter)]))
-                self.reversedallweights[update_weight] = val1
-                outlastcounter -= 1
-
-        pass
-
 
