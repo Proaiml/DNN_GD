@@ -23,7 +23,7 @@ class neuralNetwork():
         self.alllayer.append(self.onode)
 
         wei_center=0
-        for weigt_all in self.alllayer[1:]:
+        for weigt_all in self.alllayer[1:]:#bütün katman ağırlıkları eklendi
             wei_center+=1
             self.back=self.alllayer[wei_center-1]
             self.current=self.alllayer[wei_center]
@@ -33,7 +33,7 @@ class neuralNetwork():
         self.activation_function= lambda x :sigmoid(x)
         pass
 
-    def reverse_dictionary(self,takedc):  
+    def reverse_dictionary(self,takedc):  # 122
 
         lst_keys = []
         lst_vals = []
@@ -54,13 +54,13 @@ class neuralNetwork():
 
         self.allouts["o1"]=inputs
         outcounter=1
-        starting_point=0
+        starting_point=0#döngüye ilk defa mı giriyoruz
         for weigh in self.allweights.values():
             if starting_point==0:
                 starting_point+=1
                 self.ramstart=numpy.dot(weigh,inputs)
                 self.ramstart=self.activation_function(self.ramstart)
-                
+                #print(self.ramstart,"1")
                 self.allouts["o2"]=self.ramstart
                 outcounter+=1
             else:
@@ -68,21 +68,21 @@ class neuralNetwork():
                 self.ramstart1=numpy.dot(weigh,self.ramstart)
                 self.ramstart1=self.activation_function(self.ramstart1)
                 self.ramstart=self.ramstart1
-                
+                #print(self.ramstart1,"2")
                 self.allouts["o"+str(outcounter)]=self.ramstart1
 
-        
+        #print(self.ramstart1,"ramstart1")#forward sonucu ağ çıktısı
 
         output_error=targets - self.ramstart1
-        
+        #print(output_error)
 
-        error_center=len(self.alllayer)-2         
-        
+        error_center=len(self.alllayer)-2         #giriş ve çıkış katmanını saymıyoruz
+        #print(error_center)
 
-        self.reversedallweights=self.reverse_dictionary(self.allweights.copy())
+        self.reversedallweights=self.reverse_dictionary(self.allweights.copy())#ağırlıkları tersliyoruz...
 
         st_point=0
-        for revweigh in self.reversedallweights.values():
+        for revweigh in self.reversedallweights.values():#istenilen ara katman hatası kadar giriyoruz...
             if st_point==0:
                 self.remst=numpy.dot(revweigh.T,output_error)
                 self.allerrors[str(error_center)]=self.remst
@@ -96,7 +96,7 @@ class neuralNetwork():
             if error_center == 0:
                 break
 
-        
+        #print(self.allerrors,"*****")
 
 
 
@@ -104,7 +104,7 @@ class neuralNetwork():
         stl_point=0
         for update_weight in self.reversedallweights.keys():
             if stl_point == 0:
-                val=self.reversedallweights[update_weight]
+                val=self.reversedallweights[update_weight]#terslenmiş ağırlık listesinde ağırlığın değerini alıyoruz.
                 val+=self.lr*numpy.dot((output_error*self.ramstart1*(1-self.ramstart1)),numpy.transpose(self.allouts["o"+str(outlastcounter)]))
                 self.reversedallweights[update_weight]=val
                 stl_point+=1
@@ -143,7 +143,7 @@ class neuralNetwork():
 
 
 
-        
+        #print(self.ramstart1, "ramstart1")  # forward sonucu ağ çıktısı
         return self.ramstart1
 
         pass
@@ -156,13 +156,13 @@ class neuralNetwork():
 
         self.allouts["o1"] = inputs
         outcounter = 1
-        starting_point = 0 
+        starting_point = 0  # döngüye ilk defa mı giriyoruz
         for weigh in self.allweights.values():
             if starting_point == 0:
                 starting_point += 1
                 self.ramstart = numpy.dot(weigh, inputs)
                 self.ramstart = self.activation_function(self.ramstart)
-                
+                # print(self.ramstart,"1")
                 self.allouts["o2"] = self.ramstart
                 outcounter += 1
             else:
@@ -170,21 +170,21 @@ class neuralNetwork():
                 self.ramstart1 = numpy.dot(weigh, self.ramstart)
                 self.ramstart1 = self.activation_function(self.ramstart1)
                 self.ramstart = self.ramstart1
-                
+                # print(self.ramstart1,"2")
                 self.allouts["o" + str(outcounter)] = self.ramstart1
 
-        
+        # print(self.ramstart1,"ramstart1")#forward sonucu ağ çıktısı
 
         output_error = targets - self.ramstart1
-        
+        # print(output_error)
 
-        error_center = len(self.alllayer) - 2  
-        
+        error_center = len(self.alllayer) - 2  # giriş ve çıkış katmanını saymıyoruz
+        # print(error_center)
 
-        self.reversedallweights = self.reverse_dictionary(self.allweights.copy())  
+        self.reversedallweights = self.reverse_dictionary(self.allweights.copy())  # ağırlıkları tersliyoruz...
 
         st_point = 0
-        for revweigh in self.reversedallweights.values():  
+        for revweigh in self.reversedallweights.values():  # istenilen ara katman hatası kadar giriyoruz...
             if st_point == 0:
                 self.remst = numpy.dot(revweigh.T, output_error)
                 self.allerrors[str(error_center)] = self.remst
@@ -198,14 +198,14 @@ class neuralNetwork():
             if error_center == 0:
                 break
 
-        
+        # print(self.allerrors,"*****")
 
         outlastcounter = 4
         stl_point = 0
         for update_weight in self.reversedallweights.keys():
             if stl_point == 0:
                 val = self.reversedallweights[
-                    update_weight]  
+                    update_weight]  # terslenmiş ağırlık listesinde ağırlığın değerini alıyoruz.
                 val += self.lr * numpy.dot((output_error * self.ramstart1 * (1 - self.ramstart1)),
                                            numpy.transpose(self.allouts["o" + str(outlastcounter)]))
                 self.reversedallweights[update_weight] = val
