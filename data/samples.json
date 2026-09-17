@@ -1,0 +1,19 @@
+{
+  "description": "Multi-feature binary patterns for Deep Neural Network training",
+  "inputs": [
+    [0, 0, 0, 0, 1],
+    [0, 0, 1, 0, 0],
+    [0, 1, 0, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 1, 1, 1, 0],
+    [1, 0, 1, 0, 1]
+  ],
+  "targets": [
+    [0, 1, 0],
+    [1, 0, 0],
+    [0, 0, 1],
+    [0, 1, 1],
+    [1, 1, 1],
+    [1, 0, 1]
+  ]
+}
