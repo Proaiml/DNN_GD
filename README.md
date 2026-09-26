@@ -171,3 +171,12 @@ Yazarın geliştirdiği iki farklı yapay sinir ağı yaklaşımının mimari k�
 
 - **İlhan Koçaslan** — [GitHub: @Proaiml](https://github.com/Proaiml)
 
+
+## Test
+
+```bash
+pip install pytest
+python -m pytest tests -q
+```
+
+Duman testleri yalnızca CPU kullanır ve birkaç saniyede biter.
