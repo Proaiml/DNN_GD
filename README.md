@@ -19,7 +19,7 @@ Ağ, **İleri Yayılım (Forward Propagation)**, **Geriye Yayılım (Backpropaga
 
 - **Saf Matematik & NumPy:** Harici hiçbir derin öğrenme bağımlılığı yoktur; ağırlık matrisleri, hata türevleri ve gradyan güncellemeleri saf lineer cebir ile yürütülür.
 - **Sınırsız Katman Esnekliği (Arbitrary Depth):** `hiddennodes=[6, 12, 8, 4]` gibi tek bir liste vererek istediğiniz derinlikte ve nöron sayısında çok katmanlı ağlar kurabilirsiniz.
-- **Xavier / Glorot Benzeri Ağırlık İlklendirmesi:** Ağırlıklar, katman boyutuna bağlı normal dağılımla ilklendirilerek gradyan patlaması/kaybolması engellenir.
+- **Girdi boyutuna göre ölçeklenmiş ilklendirme (LeCun normal):** Ağırlıkların standart sapması $1/\sqrt{n_{\text{in}}}$'dir. Böylece sigmoid başlangıçta doygunluğa girmez ve gradyan erken sönmez.
 - **Zincir Kuralı (Chain Rule) ile Geriye Yayılım:** Her katmandaki hata payı transpoz matris çarpımlarıyla geriye doğru taşınır.
 
 ---
@@ -27,8 +27,8 @@ Ağ, **İleri Yayılım (Forward Propagation)**, **Geriye Yayılım (Backpropaga
 ## 🧠 Matematiksel Temeller ve Formülasyon
 
 ### 1. Ağırlık İlklendirmesi (Weight Initialization)
-Her katman arasındaki ağırlık matrisi, önceki katmandaki nöron sayısına ($n_{\text{in}}$) bağlı standart sapmayla normal dağılımdan örneklenir:
-$$W^{(l)} \sim \mathcal{N}\left(0, \frac{1}{\sqrt{n_{\text{in}}}}\right)$$
+Her katmanın ağırlık matrisi, ortalaması 0 ve standart sapması önceki katmandaki nöron sayısına ($n_{\text{in}}$) bağlı normal dağılımdan örneklenir:
+$$W^{(l)} \sim \mathcal{N}\left(0,\ \sigma^2\right), \qquad \sigma = \frac{1}{\sqrt{n_{\text{in}}}}$$
 
 ### 2. İleri Yayılım (Forward Propagation)
 Her $l$ katmanında, önceki katmanın aktivasyon vektörü ağırlık matrisiyle çarpılır ve Sigmoid fonksiyonundan geçirilir:
@@ -58,12 +58,14 @@ $$W^{(l)} \leftarrow W^{(l)} + \Delta W^{(l)}$$
 ```
 DNN_GD/
 │
-├── dnn.py                  # neuralNetwork sınıfı (İlhan Koçaslan'ın orijinal çekirdek kodu)
-├── inuse.py                # Orijinal eğitim çalıştırma scripti
+├── dnn.py                  # neuralNetwork sınıfı (ağın çekirdeği)
+├── inuse.py                # En kısa kullanım örneği
 ├── example.py              # Görsel grafikli, kayıp takipli kapsamlı örnek script
 ├── run.bat                 # Windows tek tıkla çalıştırma başlatıcısı
 ├── requirements.txt        # Gerekli kütüphaneler (numpy, matplotlib)
 ├── README.md               # Detaylı dokümantasyon ve mimari kılavuzu
+├── LICENSE                 # MIT lisansı
+├── tests/                  # Duman testi
 │
 ├── assets/
 │   └── dnn_architecture.jpg # 3D Yüksek çözünürlüklü yapay sinir ağı mimari şeması
@@ -88,7 +90,9 @@ python example.py
 ```
 *(Windows kullanıcıları doğrudan **`run.bat`** dosyasına çift tıklayabilir).*
 
-### Konsol Çıktısı Örneği:
+### Konsol çıktısı örneği
+
+Ağırlıklar sabit bir tohum olmadan başlatıldığı için sayılar her çalıştırmada değişir. Öğrenme oranı yüksek (0.6) olduğundan kayıp bazı çalıştırmalarda bir süre düştükten sonra dalgalanabilir ya da yükselebilir; birbirine benzeyen girdiler aynı tahmine karışabilir. Aşağıdaki çıktı tek bir çalıştırmadır:
 ```text
 ======================================================================
        DNN + GD: Deep Neural Network Trained by Gradient Descent
@@ -127,7 +131,7 @@ Sample   Input Pattern          Expected Target    Predicted Output
 
 ## 📖 `neuralNetwork` Sınıfı Kullanım Kılavuzu
 
-Orijinal `dnn.py` dosyasını kendi projenizde şu şekilde içe aktararak kullanabilirsiniz:
+`dnn.py` dosyasını kendi projenizde şu şekilde içe aktararak kullanabilirsiniz:
 
 ```python
 import dnn
@@ -147,7 +151,7 @@ targets = [[0, 1, 0], [1, 1, 1]]
 for epoch in range(500):
     nn.train(inputs_list=inputs, targets_list=targets)
 
-# 3. Yeni veri üzerinde tahmin al
+# 3. Yeni veri üzerinde tahmin: query sonucu ekrana yazar (değer döndürmez)
 nn.query([[0, 0, 0, 0, 1]])
 ```
 
@@ -155,15 +159,16 @@ nn.query([[0, 0, 0, 0, 1]])
 
 ## ⚔️ Karşılaştırma: `DNN_GD` vs `DNN_PSO`
 
-Yazarın geliştirdiği iki farklı yapay sinir ağı yaklaşımının mimari kıyaslaması:
+Aynı yazarın iki farklı eğitim yaklaşımının kıyaslaması:
 
 | Karşılaştırma Kriteri | **DNN_GD** (Bu Proje) | **[DNN_PSO](https://github.com/Proaiml/DNN_PSO)** |
 | :--- | :--- | :--- |
 | **Optimizasyon Yöntemi** | Geriye Yayılım (Backpropagation) | Parçacık Sürü Optimizasyonu (PSO) |
 | **Ağırlık Güncellemesi** | Gradyan İnişi ($\nabla Loss$) | Sürü En İyisi ($G_{\text{best}}, P_{\text{best}}$) |
 | **Türev İhtiyacı** | Zorunlu (Zincir Kuralı) | **Türevsiz (Derivative-Free)** |
-| **Hesaplama Hızı** | Çok Hızlı (Matris Çarpımı) | Popülasyon tabanlı simülasyon |
-| **Yerel Minimum Riski** | Var (Eyer noktaları/Yerel çukurlar) | Çok Düşük (Sürü küresel arama yapar) |
+| **Hesaplama Maliyeti** | Adım başına bir ileri ve bir geri geçiş | Adım başına parçacık sayısı kadar ileri geçiş |
+| **Yerel Minimum** | Takılabilir (yerel çukurlar, eyer noktaları) | Sürü daha geniş arar, ama erken yakınsama riski de vardır |
+| **Uygun Olduğu Durum** | Türevlenebilir, çok parametreli ağlar | Türevsiz ya da küçük ağlar, ayrık/gürültülü amaçlar |
 
 ---
 
@@ -172,11 +177,11 @@ Yazarın geliştirdiği iki farklı yapay sinir ağı yaklaşımının mimari k�
 - **İlhan Koçaslan** — [GitHub: @Proaiml](https://github.com/Proaiml)
 
 
-## Test
+## 🧪 Test
 
 ```bash
 pip install pytest
 python -m pytest tests -q
 ```
 
-Duman testleri yalnızca CPU kullanır ve birkaç saniyede biter.
+Test, ağın kurulduğunu, eğitimin ağırlıkları değiştirdiğini ve sorgunun çalıştığını denetler; bir saniyeden kısa sürer.
